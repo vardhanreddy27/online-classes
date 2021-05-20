@@ -15,7 +15,7 @@ $google_client->setClientId('702455199710-hhlq11gb4mh6sbrplg7cl57mk0td35kd.apps.
 $google_client->setClientSecret('vzEf4E5R_vRAug81u_9lCxf3');
 
 //Set the OAuth 2.0 Redirect URI
-$google_client->setRedirectUri('http://localhost:8080/canna/gindex.php');
+$google_client->setRedirectUri('https://radiant-beyond-33119.herokuapp.com/gindex.php');
 
 //
 $google_client->addScope('email');
