@@ -1,0 +1,731 @@
+<?php
+include('config.php');
+$login_button = '';
+//This $_GET["code"] variable value received after user has login into their Google Account redirct to PHP script then this variable value has been received
+if(isset($_GET["code"]))
+{
+ //It will Attempt to exchange a code for an valid authentication token.
+ $token = $google_client->fetchAccessTokenWithAuthCode($_GET["code"]);
+
+ //This condition will check there is any error occur during geting authentication token. If there is no any error occur then it will execute if block of code/
+ if(!isset($token['error']))
+ {
+  //Set the access token used for requests
+  $google_client->setAccessToken($token['access_token']);
+
+  //Store "access_token" value in $_SESSION variable for future use.
+  $_SESSION['access_token'] = $token['access_token'];
+
+  //Create Object of Google Service OAuth 2 class
+  $google_service = new Google_Service_Oauth2($google_client);
+
+  //Get user profile data from google
+  $data = $google_service->userinfo->get();
+
+  //Below you can find Get profile data and store into $_SESSION variable
+  if(!empty($data['given_name']))
+  {
+   $_SESSION['user_first_name'] = $data['given_name'];
+  }
+
+  if(!empty($data['family_name']))
+  {
+   $_SESSION['user_last_name'] = $data['family_name'];
+  }
+
+  if(!empty($data['email']))
+  {
+   $_SESSION['user_email_address'] = $data['email'];
+  }
+
+  if(!empty($data['gender']))
+  {
+   $_SESSION['user_gender'] = $data['gender'];
+  }
+
+  if(!empty($data['picture']))
+  {
+   $_SESSION['user_image'] = $data['picture'];
+  }
+ }
+}
+
+//This is for check user has login into system by using Google account, if User not login into system then it will execute if block of code and make code for display Login link for Login using Google account.
+if(!isset($_SESSION['access_token']))
+{
+ //Create a URL to obtain user authorization
+ $login_button = '<a href="'.$google_client->createAuthUrl().'"><img src="sign-in-with-google.png" /></a>';
+}
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head><script>
+    history.pushState(null, null, null);
+    window.addEventListener('popstate', function () {
+        history.pushState(null, null, null);
+    });
+</script>
+  <meta charset="utf-8">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.all.min.js"></script><link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.min.css'>  <title>EduSkills - Tutor Online Courses & LMS Multipurpose HTML template</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="vendors/bootstrap/bootstrap.min.css">
+  <script src="sweetalert2.all.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.js"></script>
+  <script src="sweetalert2.min.js"></script>
+<link rel="stylesheet" href="sweetalert2.min.css"><link rel="stylesheet" href="vendors/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="vendors/jquery-nice-select/nice-select.css">
+  <link rel="stylesheet" href="vendors/OwlCarousel2/owl.carousel.min.css">
+  <link rel="stylesheet" href="vendors/magnific-popup/css/magnific-popup.css">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link rel="shortcut icon" href="assets/images/favicon.png" type="image/png">   
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <style>
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+</style>
+</head>
+<body id="top">
+ <!-- signup-modal -->
+  <div class="modal fade rounded" id="signup-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-align:center; text-secondary font-weight-600">Register now</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3 p-sm-4">
+                <form method="POST" action="register.php?page=aindex"class="row">
+                    <div class="form-group mb-20 col-12">
+                        <label class="text-secondary h6 mb-2" for="fname">Your Name*</label>
+                        <input class="form-control shadow-none rounded-sm" type="text" placeholder="Jack" name="name"  id="name" required>
+                    </div>
+                    <div class="form-group mb-20 col-12">
+                        <label class="text-secondary h6 mb-2" for="pnumber">Phone Number*</label>
+                        <input class="form-control shadow-none rounded-sm" type="text" placeholder="Phone Number"  name="number"  required>
+                    </div>
+                    <div class="form-group mb-20 col-12">
+                        <label class="text-secondary h6 mb-2" for="email2">Email Address*</label>
+                        <input class="form-control shadow-none rounded-sm" type="email" placeholder="jack@email.com"  name="email" id="email" required>
+                    </div>
+                
+                    <div class="form-group mb-20 col-12">
+                        <label class="text-secondary h6 mb-2" for="password">Password*</label>
+                        <input class="form-control shadow-none rounded-sm"type="password" id="Password" name="password" required>
+                    </div>
+                    <div class="form-group mb-20 col-12">
+                        <label class="text-secondary h6 mb-2" for="confirm_password">Retype Password*</label>
+                        <input class="form-control shadow-none rounded-sm"id="ConfirmPassword" name="confpassword"  type="password" required>
+                        <div style="margin-top: 7px;" id="CheckPasswordMatch"></div>
+
+</div>
+                    <div class="form-group col-12">
+                        <button class="btn btn-primary w-100 rounded-sm" type="submit" name="submit" value="submit">Sign Up</button>
+                    </div><div class="text-center form-group mb-20 col-12">or</div>
+                    <div class="text-center btn form-control " style="font-size:large;">
+                            <?php if(!isset($_SESSION['access_token']))
+{
+ $login_button = '<a style="color: #001B61;" href="'.$google_client->createAuthUrl().'">    <img style="height:30px;width:30px;"src="assets/images/courses/google.png" alt="logo">&nbsp&nbsp&nbsp&nbsp SignUp With Google</a>';
+}
+
+if($login_button == '')
+{
+ echo '<h3><b>Name :</b> '.$_SESSION['user_first_name'].'</h3>';
+}
+else
+{
+ echo '<div align="">'.$login_button . '</div>';
+}
+?>
+                         </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+  <!-- signup-modal -->
+
+  <!-- signin-modal -->
+  <div class="modal fade rounded" id="signin-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-auto" style="max-width:400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-secondary font-weight-600">Welcome back</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3 p-sm-4">
+               <ul class="nav nav-pills nav-justified tab-nav" id="myTab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                     <a class="nav-link active" id="guardian-tab" data-toggle="tab" href="#guardian" role="tab" aria-controls="guardian" aria-selected="true"><img src="assets/images/tutor.png" class="mr-2" alt="" style="height:45px"> Login as<br>Guardian</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                     <a class="nav-link" id="tutor-tab" data-toggle="tab" href="#tutor" role="tab" aria-controls="tutor" aria-selected="false"><img src="assets/images/guardian.png" class="mr-2" alt="" style="height:45px"> Login as<br>Tutor</a>
+                  </li>
+               </ul>
+               <div class="tab-content" id="myTabContent">
+                  <div class="tab-pane fade show active" id="guardian" role="tabpanel" aria-labelledby="guardian-tab">
+                     <form method="POST"action="glogin.php?page=aindex" class="row">
+                     <div class="text-center btn form-control " style="font-size:large;">
+                            <?php if(!isset($_SESSION['access_token']))
+{
+ $login_button = '<a style="color: #001B61;" href="'.$google_client->createAuthUrl().'">    <img style="height:30px;width:30px;"src="assets/images/courses/google.png" alt="logo">&nbsp&nbsp&nbsp&nbsp Login With Google</a>';
+}
+
+if($login_button == '')
+{
+ echo '<h3><b>Name :</b> '.$_SESSION['user_first_name'].'</h3>';
+}
+else
+{
+ echo '<div align="">'.$login_button . '</div>';
+}
+?>
+                         </div><div class="text-center form-group mb-20 col-12">or</div><br><div class="form-group mb-20 col-12">
+                             <label class="text-secondary h6 font-weight-600 mb-2" for="email">Email Address*</label>
+                             <input class="form-control shadow-none rounded-sm" type="email"name="email" id="email" required>
+                         </div>
+                         <div class="form-group mb-20 col-12">
+                             <label class="text-secondary h6 font-weight-600 mb-2" for="passwordSignIn">Password*</label>
+                             <input class="form-control shadow-none rounded-sm"name="password" type="password" id="passwordSignIn" required>
+                         </div>
+                         <div class="form-group col-12">
+                             <button class="btn btn-primary w-100 rounded-sm" type="submit" name="submit" value="submit">Sign In</button>
+                         </div>
+                     </form>
+                  </div>
+                  <div class="tab-pane fade" id="tutor" role="tabpanel" aria-labelledby="tutor-tab">
+                     <form method="POST"action="tlogin.php?page=index" class="row">
+                         <div class="form-group mb-20 col-12">
+                             <label class="text-secondary h6 font-weight-600 mb-2" for="email">Email Address*</label>
+                             <input class="form-control shadow-none rounded-sm" type="email" id="email" required>
+                         </div>
+                         <div class="form-group mb-20 col-12">
+                             <label class="text-secondary h6 font-weight-600 mb-2" for="passwordSignIn">Password*</label>
+                             <input class="form-control shadow-none rounded-sm" type="password" id="passwordSignIn" required>
+                         </div>
+                         <div class="form-group col-12">
+                             <button class="btn btn-primary w-100 rounded-sm" type="submit">Sign In</button>
+                         </div>
+                     </form>
+                  </div>
+               </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <!-- signin-modal -->
+  
+<header class="bg-white shadow">
+   <div class="container-lg">
+      <nav class="navbar navbar-expand-xl navbar-dark px-0">
+         <a class="navbar-brand" href="index.php">
+            <img src="assets/images/logo-2.png" alt="" style="height:49px">
+         </a>
+
+         <button class="navbar-toggler ml-3" type="button" data-toggle="collapse" data-target="#navbarNavAlt" aria-controls="navbarNavAlt" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="fas fa-bars"></span>
+         </button>
+         
+         <div class="collapse navbar-collapse" id="navbarNavAlt">
+            <ul class="navbar-nav mt-4 mt-xl-0 ml-auto">
+               <li class="nav-item dropdown active">
+                  <a class="nav-link" href="index.php" role="button" aria-haspopup="true" aria-expanded="false">
+                     Home 
+                  </a>
+                              </li>
+               <li class="nav-item dropdown">
+                  <a class="nav-link" href="about.php">
+                     About
+                  </a>
+               
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="courses.php">Subjects</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="blog.php">1-on-1 Online Classes</a>
+               </li>
+                             <li class="nav-item">
+                  <a class="nav-link" href="contact.php">Contact Us</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="#!" data-toggle="modal" data-target="#signin-modal">Sign In</a>
+                  
+               </li> 
+            </ul>
+            <div class="ml-0 ml-xl-4 mt-3 mt-xl-0 mb-3 mb-xl-0 text-center text-xl-right">
+                
+                  <a href="#!" class="btn btn-sm btn-blue rounded-pill" data-toggle="modal" data-target="#signup-modal">Sign Up</a>
+            </div>
+         </div>
+      </nav>
+   </div>
+</header>
+
+<!-- start of banner -->
+<section class="banner-1 has-overlay bg-cover" style="background-image: url(assets/images/main2.jpg);">
+   <div class="container-lg">
+      <div class="row justify-content-center align-items-center">
+         <div class="col-md-6 col-sm-8 text-center text-md-left">
+            <div class="text-white">
+               <h2 class="text-lg mb-30">Private Personalized<span class="has-line line-primary"> Online</span> Tuition</h2>
+               <p class="h4">Education now more easy then before</p>
+               
+            </div>
+         </div>
+         <div class="col-md-6 col-sm-10 mt-5 mt-md-0">
+            <form method="POST" action="index.php" class="search-form rounded">
+               <div class="row">
+                  <div class="col-lg-6">
+                     <input class="form-control shadow-none rounded-sm"name="name" type="text" placeholder="Name Of Your Child" id="name" required>
+                   <br></div> 
+                   <div class="col-lg-6">
+                     <select name="class" id="" required>>
+                        <option selected disabled>Select Class</option>
+                        <option value="1">Class - 1</option>
+                        <option value="2">Class - 2</option>
+                        <option value="3">Class - 3</option>
+                        <option value="4">Class - 4</option>
+                        <option value="5">Class - 5</option>
+                        <option value="6">Class - 6</option>
+                        <option value="7">Class - 7</option>
+                        <option value="8">Class - 8</option>
+                        <option value="9">Class - 9</option>
+                        <option value="10">Class - 10</option>
+                     </select>
+                  </div>
+                  <div class="col-lg-6 form-group mb-20">   
+                        <input class="form-control shadow-none rounded-sm" name="email"type="email" placeholder="Email Address" id="email" required>
+                  </div>
+                  <div class="col-lg-6">
+                        <input class="form-control shadow-none rounded-sm" type="number" name="number"placeholder="Mobile Number" id="number" required>
+                 <br> </div>
+                
+                  <div class="col-lg-6">
+                     <select name="subject" id=""required>>
+                        <option selected disabled>Select Subject</option>
+                        <option value="maths">Maths</option>
+                        <option value="science">Science</option>
+                     </select>
+                  </div>
+                  <div class="col-lg-6">
+                     <select name="gender" id=""required>>
+                        <option selected disabled>Select Gender</option>
+                        <option value="men">Men</option>
+                        <option value="women">Women</option>
+                        <option value="other">Other</option>
+                     </select>
+                  </div>
+                  <div class="col-lg-12">
+                     <button type="submit" name="submit" value="submit"class="btn btn-primary rounded-pill w-100">BOOK A FREE DEMO CLASS</button>
+                  </div>
+               </div>
+            </form>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of banner -->
+
+<!-- start of we-offer-section -->
+<section class="section-padding">
+   <div class="container">
+      <div class="row justify-content-center">
+         <div class="col-lg-12 text-center">
+            <h2 class="section-title">What <span class="has-line">We Offer</span></h2>
+         </div>
+         <div class="col-lg-4 col-sm-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/we-offer/05.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">1 - to - 1 Tutoring</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-sm-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/we-offer/02.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Online Tutoring</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-sm-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/we-offer/03.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Group Tutoring</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+  
+      </div>
+   </div>
+</section>
+<!-- end of we-offer-section -->
+
+<!-- start of video-popup section -->
+<section class="section-padding pt-0 bg-light has-white-half">
+   <div class="container">
+      <div class="row justify-content-center">
+         <div class="col-lg-9">
+            <div class="text-center">
+               <a href="https://www.youtube.com/watch?v=yD7b6R0-LQw" class="d-block has-overlay has-video-popup tansform-none">
+                  <img class="img-fluid rounded" src="assets/images/video-thumb-3.jpg" alt="">
+                  <img class="play-btn" src="assets/images/video-btn.png" alt="">
+               </a>
+               <h2 class="section-title mt-50 mb-25">What  Some Awesome Parent Says <span class="has-line">About Us</span></h2>
+               <p class="mb-40">Weddings and any opinions suitable smallest nay. My he houses or months settle remove <br> ladies appear. Engrossed suffering supposing he recommend.</p>
+               <a href="about.php" class="btn btn-lg btn-secondary rounded-pill">About Us</a>
+            </div>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of video-popup section -->
+
+<!-- start of how-it-works section -->
+<section class="section-padding">
+   <div class="container">
+      <div class="row justify-content-center">
+         <div class="col-lg-8 text-center">
+            <h2 class="section-title">How <span class="has-line">It Works</span> <br> For Students/Parents?</h2>
+         </div>
+      </div>
+      <div class="row justify-content-center">
+         <div class="col-lg-4 col-sm-6 mt-40">
+            <div class="how-it-works-item text-center shadow">
+               <img src="assets/images/how-it-works/01.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Tell Us Where You <br> Need Help</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-sm-6 mt-40">
+            <div class="how-it-works-item text-center shadow">
+               <img src="assets/images/how-it-works/02.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Choose The Tutor <br> You Want</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-sm-6 mt-40">
+            <div class="how-it-works-item text-center shadow">
+               <img src="assets/images/how-it-works/03.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Book A Tutor <br> Start Lesson</h3>
+               <p class="mt-20">His exquisite sincerity education shameless ten earnestly breakfast. Scale began quiet up short wrong in Personal attention.</p>
+            </div>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of how-it-works section -->
+
+<!-- start of section -->
+<section class="section-padding pt-0">
+   <div class="container">
+      <div class="row align-items-center">
+         <div class="col-lg-7 text-center">
+            <img class="img-fluid" src="assets/images/free-class.png" alt="">
+         </div>
+         <div class="col-lg-5 mt-5 mt-lg-0">
+            <h2 class="section-title mb-30">Request A Class <span class="has-line">for FREE Trail</span></h2>
+            <p class="mb-4">Weddings and any opinions suitable smallest nay. My he houses or months settle remove ladies appear. Engrossed suffering supposing he recommend. Commanded no of depending extremity recommend attention tolerably.</p>
+            <a href="#top" class="btn btn-lg btn-secondary rounded-pill">Book A  Free Demo Class</a>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of section -->
+
+<!-- start of find-tutor-section -->
+<section class="find-tutor-section section-padding bg-cover has-overlay text-white" style="background-image: url(assets/images/find-tutor.jpg);">
+   <div class="container">
+      <div class="row justify-content-center">
+         <div class="col-lg-8 text-center">
+            <h2 class="section-title text-white mb-30">Find <span class="has-line">Online Tutors</span> <br> In Any Subject</h2>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-lg-5  col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/01.png" alt="">
+               <h3 class="mt-15 font-weight-600">Math</h3>
+            </div>
+         </div>
+         <div class="col-lg-3 col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/02.png" alt="">
+               <h3 class="mt-15 font-weight-600">English</h3>
+            </div>
+         </div>
+      
+         <div class="col-lg-3 col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/04.png" alt="">
+               <h3 class="mt-15 font-weight-600">Chemistry</h3>
+            </div>
+         </div>
+         <div class="col-lg-5 col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/03.png" alt="">
+               <h3 class="mt-15 font-weight-600">Social Science</h3>
+            </div>
+         </div>
+ 
+         <div class="col-lg-3 col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/07.png" alt="">
+               <h3 class="mt-15 font-weight-600">Physics</h3>
+            </div>
+         </div>
+         <div class="col-lg-3 col-md-4 col-6">
+            <div class="mt-40 text-center hover-grayscale">
+               <img src="assets/images/subject/08.png" alt="">
+               <h3 class="mt-15 font-weight-600">Biology</h3>
+            </div>
+         </div>
+       
+      </div>
+   </div>
+</section>
+<!-- end of find-tutor-section -->
+
+<!-- start of tutors join recently section -->
+<br><br>
+<!-- end of tutors join recently section -->
+
+<!-- start of How It Works for tutors section -->
+<section class="section-padding pt-0">
+   <div class="container">
+      <div class="row">
+         <div class="col-lg-12 text-center">
+            <h2 class="section-title mb-30">How It Works <span class="has-line">for Tutors?</span></h2>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-lg-4 col-md-6">
+            <div class="how-it-works-item works-item-alt shape-style-1 text-center shadow">
+               <img class="position-static" src="assets/images/how-it-works-tutors/01.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Create A Free <br> Account Now</h3>
+               <p class="mt-20">Advantage old hTad otherwise sincerity dependent additions. Six draw you him full not mean evil. Prepare garrets it expense.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-md-6">
+            <div class="how-it-works-item works-item-alt shape-style-2 text-center shadow">
+               <img class="position-static" src="assets/images/how-it-works-tutors/02.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Apply to Your <br> Tuition Job</h3>
+               <p class="mt-20">Advantage old hTad otherwise sincerity dependent additions. Six draw you him full not mean evil. Prepare garrets it expense.</p>
+            </div>
+         </div>
+         <div class="col-lg-4 col-md-6">
+            <div class="how-it-works-item works-item-alt shape-style-1 text-center shadow">
+               <img class="position-static" src="assets/images/how-it-works-tutors/03.png" alt="">
+               <h3 class="mt-20 font-weight-600 text-secondary">Start Tutoring <br>With Happiness</h3>
+               <p class="mt-20">Advantage old hTad otherwise sincerity dependent additions. Six draw you him full not mean evil. Prepare garrets it expense.</p>
+            </div>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of How It Works for tutors section -->
+
+<!-- start of tutors-carousel-alt section -->
+<section class="section-padding bg-cover" style="background-image: url(assets/images/pattern-bg.jpg);">
+   <div class="container">
+      <div class="row">
+         <div class="col-lg-12 text-center">
+            <h2 class="section-title mb-60">Happy <span class="has-line">Tutors Say</span></h2>
+         </div>
+      </div>
+   </div>
+   <div class="container-lg">
+      <div class="row">
+         <div class="col-12">
+            <div class="owl-carousel tutors-carousel-alt has-dots-center">
+               <div class="tutor-item-alt bg-white p-30">
+                  <p>Left till here away at to whom past. Feelings laughing at no wondered repeated provided finished. It acceptance thoro advantages.</p>
+                  <div class="media d-block d-sm-flex mt-25">
+                     <img src="assets/images/user-01.jpg" alt="">
+                     <div class="ml-0 ml-sm-3 mt-3 mt-sm-0">
+                        <h4 class="font-weight-600 text-blue mb-1">James Benzion</h4>
+                        <p>Pittsburgh, USA</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="tutor-item-alt bg-white p-30">
+                  <p>Left till here away at to whom past. Feelings laughing at no wondered repeated provided finished. It acceptance thoro advantages.</p>
+                  <div class="media d-block d-sm-flex mt-25">
+                     <img src="assets/images/user-05.png" alt="">
+                     <div class="ml-0 ml-sm-3 mt-3 mt-sm-0">
+                        <h4 class="font-weight-600 text-blue mb-1">Alex Benzion</h4>
+                        <p>Khulnala, UAE</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="tutor-item-alt bg-white p-30">
+                  <p>Left till here away at to whom past. Feelings laughing at no wondered repeated provided finished. It acceptance thoro advantages.</p>
+                  <div class="media d-block d-sm-flex mt-25">
+                     <img src="assets/images/user-06.png" alt="">
+                     <div class="ml-0 ml-sm-3 mt-3 mt-sm-0">
+                        <h4 class="font-weight-600 text-blue mb-1">Jesmin Walker</h4>
+                        <p>Khulnala, UAE</p>
+                     </div>
+                  </div>
+               </div>
+               <div class="tutor-item-alt bg-white p-30">
+                  <p>Left till here away at to whom past. Feelings laughing at no wondered repeated provided finished. It acceptance thoro advantages.</p>
+                  <div class="media d-block d-sm-flex mt-25">
+                     <img src="assets/images/user-05.png" alt="">
+                     <div class="ml-0 ml-sm-3 mt-3 mt-sm-0">
+                        <h4 class="font-weight-600 text-blue mb-1">Alex Benzion</h4>
+                        <p>Khulnala, UAE</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of tutors-carousel-alt section -->
+
+<!-- start of mobile app section -->
+<section class="section-padding">
+   <div class="container">
+      <div class="row align-items-center">
+         <div class="col-lg-5">
+            <h2 class="section-title mb-30">Our <span class="has-line">Mobile App</span></h2>
+            <p class="mb-4">Weddings and any opinions suitable smallest nay. My he houses or months settle remove ladies appear. Engrossed suffering supposing he recommend. Commanded no of depending extremity recommend attention tolerably.</p>
+            <a href="#!" class="btn btn-lg btn-secondary rounded-pill">Download App</a>
+         </div>
+         <div class="col-lg-7 mt-5 mt-lg-0 text-center">
+            <img class="img-fluid" src="assets/images/mobile-app.png" alt="">
+         </div>
+      </div>
+   </div>
+</section>
+<!-- end of mobile app section -->
+
+<footer>
+   <div class="container">
+      
+      <div class="py-3">
+         <div class="row align-items-center">
+            <div class="col-lg-9 text-center text-lg-left mb-4 mb-lg-0">
+               <ul class="list-unstyled list-inline font-weight-500">
+                  <li class="list-inline-item"><a href="index.php" class="p-2 d-block text-link">Home</a></li>
+                  <li class="list-inline-item"><a href="about.php" class="p-2 d-block text-link">About</a></li>
+                  <li class="list-inline-item"><a href="courses.php" class="p-2 d-block text-link">Subjects</a></li>
+                  <li class="list-inline-item"><a href="blog.php" class="p-2 d-block text-link">1-on-1 Online Classes</a></li>
+                  <li class="list-inline-item"><a href="contact.php" class="p-2 d-block text-link">Contact Us</a></li>
+               </ul>
+            </div>
+            <div class="col-lg-3 text-center text-lg-right">
+               <ul class="social-icons list-unstyled mr-2">
+                  <li><a href="#!" class="text-link"><i class="fab fa-facebook-f"></i></a></li>
+                  <li><a href="#!" class="text-link"><i class="fab fa-twitter"></i></a></li>
+                  <li><a href="#!" class="text-link"><i class="fab fa-instagram"></i></a></li>
+                  <li><a href="#!" class="text-link pr-0"><i class="fab fa-skype"></i></a></li>
+               </ul>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="footer-bottom py-3 border-top">
+      <div class="container">
+         <div class="row align-items-center">
+            <div class="col-lg-12 text-center mb-3 mb-lg-0">
+               &copy; Copyright All Review <span class="text-primary">Edu</span>Skills
+            </div>
+           
+         </div>
+      </div>
+   </div>
+</footer>
+<a href="#top" class="scroll-to-top">
+   <span class="fas fa-chevron-up"></span>
+</a>
+<script>
+$(document).ready(function () {
+   $("#ConfirmPassword").on('keyup', function(){
+    var password = $("#Password").val();
+    var confirmPassword = $("#ConfirmPassword").val();
+    if (password != confirmPassword)
+        $("#CheckPasswordMatch").html("Password does not match !").css("color","red");
+    else
+        $("#CheckPasswordMatch").html("Password match !").css("color","green");
+   });
+});
+</script>
+<!-- jQuery -->
+<script src="vendors/jQuery/jquery.min.js"></script>
+<script src="vendors/bootstrap/bootstrap.min.js"></script>
+<script src="vendors/jquery-nice-select/jquery.nice-select.min.js"></script>
+<script src="vendors/OwlCarousel2/owl.carousel.min.js"></script>
+<script src="vendors/counterup/waypoints.min.js"></script>
+<script src="vendors/counterup/jquery.counterup.min.js"></script>
+<script src="vendors/magnific-popup/js/magnific-popup.min.js"></script>
+
+<!-- Main Script -->
+<script src="assets/js/script.js"></script>
+
+</body>
+
+</html>
+<?php
+include 'dbconnect.php';
+if(isset($_POST['submit'])){
+$name=$_POST["name"];
+$email=$_POST["email"];
+$number=$_POST["number"];
+$gender=$_POST["gender"];
+$class=$_POST["class"];
+$subject=$_POST["subject"];
+$sql = "insert into demo_class(name,class,email,number,subject,gender) values('$name','$class','$email','$number','$subject','$gender')";
+if($conn->query($sql) === TRUE)
+{
+   ?>
+   <script>
+ function hi(){
+  Swal.fire(
+ 'Demo Class Booked',
+ 'further notified by mail',
+ 'success'
+)}
+hi();
+</script>
+   
+   <?php
+  }
+
+else{
+   
+}
+$conn->close();
+}
+?>
