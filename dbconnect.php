@@ -1,9 +1,9 @@
 
   
     <?php 
-    $servername="localhost";
-    $username="root";
-    $password="";
+    $servername="sql6.freemysqlhosting.net";
+    $username="sql6413737";
+    $password="uN9H3KbsDa";
     $dbname="canna";
     $conn=new mysqli($servername,$username,$password,$dbname);
     if($conn->connect_error)
